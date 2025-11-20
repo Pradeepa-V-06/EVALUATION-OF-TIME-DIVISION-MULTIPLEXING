@@ -1,7 +1,7 @@
-# EVALUATION-OF-TIME-DIVISION-MULTIPLEXING
+# EVALUATION-OF-FREQUENCY-DIVISION-MULTIPLEXING
 
 ### Aim:
-Study of TDM pulse amplitude modulation/ demodulation with transmitter block (clock) and channel identification information linked directly to the receivers.  
+Study of FDM pulse amplitude modulation/ demodulation with transmitter block (clock) and channel identification information linked directly to the receivers.  
 
 ### Apparatus Required:
 
@@ -33,9 +33,89 @@ It takes the sample from each channel per revolution and rotates at the rate of 
 
 ### Tabulation
 
-<img width="672" height="448" alt="image" src="https://github.com/user-attachments/assets/05600b28-ba54-4cd4-9ff4-f088865e85ae" />
+<img width="1280" height="581" alt="image" src="https://github.com/user-attachments/assets/2d311464-927c-46e2-8ebe-5cc43adb8207" />
+
+### PROGRAM
+```
+Fs = 56300;
+t = 0:1/Fs:0.02;
+
+m1 = sin(2*%pi*200*t);
+m2 = sin(2*%pi*300*t);
+m3 = sin(2*%pi*400*t);
+m4 = sin(2*%pi*500*t);
+m5 = sin(2*%pi*600*t);
+m6 = sin(2*%pi*700*t);
+
+c1 = 3000; c2 = 6000; c3 = 9000; c4 = 12000; c5 = 15000; c6 = 18000;
+
+carrier1 = cos(2*%pi*c1*t);
+carrier2 = cos(2*%pi*c2*t);
+carrier3 = cos(2*%pi*c3*t);
+carrier4 = cos(2*%pi*c4*t);
+carrier5 = cos(2*%pi*c5*t);
+carrier6 = cos(2*%pi*c6*t);
+
+s1 = m1 .* carrier1;
+s2 = m2 .* carrier2;
+s3 = m3 .* carrier3;
+s4 = m4 .* carrier4;
+s5 = m5 .* carrier5;
+s6 = m6 .* carrier6;
+
+s_total = s1 + s2 + s3 + s4 + s5 + s6;
+
+// Demultiplex: multiply by carriers to shift each band back to baseband
+r1 = s_total .* carrier1;
+r2 = s_total .* carrier2;
+r3 = s_total .* carrier3;
+r4 = s_total .* carrier4;
+r5 = s_total .* carrier5;
+r6 = s_total .* carrier6;
+
+// Simple FFT-based ideal low-pass filter (avoids butter/toolbox issues)
+function y = ideal_lowpass_fft(x, Fs, fc)
+    N = length(x);
+    X = fft(x);
+    f = Fs*(0:N-1)/N;
+    mask = (f <= fc) | (f >= Fs-fc);
+    Y = X .* mask;
+    y = real(ifft(Y));
+endfunction
+
+fc = 1000;
+dm1 = ideal_lowpass_fft(r1, Fs, fc);
+dm2 = ideal_lowpass_fft(r2, Fs, fc);
+dm3 = ideal_lowpass_fft(r3, Fs, fc);
+dm4 = ideal_lowpass_fft(r4, Fs, fc);
+dm5 = ideal_lowpass_fft(r5, Fs, fc);
+dm6 = ideal_lowpass_fft(r6, Fs, fc);
+
+figure(1);
+subplot(3,2,1); plot(t,m1); title("Message Signal 1");
+subplot(3,2,2); plot(t,m2); title("Message Signal 2");
+subplot(3,2,3); plot(t,m3); title("Message Signal 3");
+subplot(3,2,4); plot(t,m4); title("Message Signal 4");
+subplot(3,2,5); plot(t,m5); title("Message Signal 5");
+subplot(3,2,6); plot(t,m6); title("Message Signal 6");
+
+figure(2);
+plot(t, s_total); title("Multiplexed FDM Signal");
+
+figure(3);
+subplot(3,2,1); plot(t,dm1); title("Recovered Signal 1");
+subplot(3,2,2); plot(t,dm2); title("Recovered Signal 2");
+subplot(3,2,3); plot(t,dm3); title("Recovered Signal 3");
+subplot(3,2,4); plot(t,dm4); title("Recovered Signal 4");
+subplot(3,2,5); plot(t,dm5); title("Recovered Signal 5");
+subplot(3,2,6); plot(t,dm6); title("Recovered Signal 6");
+```
+### OUTPUT
+<img width="757" height="727" alt="image" src="https://github.com/user-attachments/assets/aa5717b7-a114-4c12-89bb-6f0cb4150753" />
+<img width="759" height="722" alt="image" src="https://github.com/user-attachments/assets/a174f70b-7bf3-4bb7-8c00-75212f29f7aa" />
+<img width="761" height="721" alt="image" src="https://github.com/user-attachments/assets/3c94912f-346a-4280-b006-5d7529df4080" />
+
 
 ### Result
-
-
+Thus,Frequency division multiplexing is done experimentally and output is verified.
 
